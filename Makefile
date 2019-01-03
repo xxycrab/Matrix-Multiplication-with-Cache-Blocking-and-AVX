@@ -30,6 +30,7 @@ atlas := 1
 multi := 0
 NO_BLAS = 1
 include $(PUB)/Arch/arch.gnu_c99.generic
+CFLAGS += -mfma
 endif
 endif
 endif
@@ -60,6 +61,7 @@ ifeq ($(NO_BLAS), 1)
     C++FLAGS += -DNO_BLAS
     CFLAGS += -DNO_BLAS
 endif
+
 
 OPTIMIZATION = $(MY_OPT)
 
