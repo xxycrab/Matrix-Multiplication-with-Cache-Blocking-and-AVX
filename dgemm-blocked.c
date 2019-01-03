@@ -43,6 +43,14 @@ static void do_block (int lda, int M, int N, int K, double* A, double* B, double
  * On exit, A and B maintain their input values. */  
 void square_dgemm (int lda, double* A, double* B, double* C)
 {
+#ifdef TRANSPOSE
+  for (int i = 0; i < lda; ++i)
+    for (int j = i+1; j < lda; ++j) {
+        double t = B[i*lda+j];
+        B[i*lda+j] = B[j*lda+i];
+        B[j*lda+i] = t;
+    }
+#endif
   /* For each block-row of A */ 
   for (int i = 0; i < lda; i += BLOCK_SIZE)
     /* For each block-column of B */
@@ -56,14 +64,18 @@ void square_dgemm (int lda, double* A, double* B, double* C)
 	int K = min (BLOCK_SIZE, lda-k);
 
 	/* Perform individual block dgemm */
-	do_block(lda, M, N, K, A + i*lda + k, B + k*lda + j, C + i*lda + j);
-      }
 #ifdef TRANSPOSE
+	do_block(lda, M, N, K, A + i*lda + k, B + j*lda + k, C + i*lda + j);
+#else
+	do_block(lda, M, N, K, A + i*lda + k, B + k*lda + j, C + i*lda + j);
+#endif
+      }
+#if TRANSPOSE
   for (int i = 0; i < lda; ++i)
     for (int j = i+1; j < lda; ++j) {
         double t = B[i*lda+j];
         B[i*lda+j] = B[j*lda+i];
         B[j*lda+i] = t;
-  }
+    }
 #endif
 }
