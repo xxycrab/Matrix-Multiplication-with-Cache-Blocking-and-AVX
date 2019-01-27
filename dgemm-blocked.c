@@ -13,7 +13,7 @@ const char *dgemm_desc = "Simple blocked dgemm.";
 
 #if !defined(BLOCK_SIZE)
 #define BLOCK_SIZE 1024
-#define BLOCK_SIZE_2 256
+#define BLOCK_SIZE_2 512
 #define BLOCK_SIZE_3_M 64
 #define BLOCK_SIZE_3_N 64
 #define BLOCK_SIZE_3_K 64
@@ -36,7 +36,6 @@ static void do_block(int lda, int M, int N, int K, double *A, double *B, double 
             register __m256d c_30_33 = _mm256_loadu_pd(C + (6 * i + 3) * lda + j * 4);
             register __m256d c_40_43 = _mm256_loadu_pd(C + (6 * i + 4) * lda + j * 4);
             register __m256d c_50_53 = _mm256_loadu_pd(C + (6 * i + 5) * lda + j * 4);
-
 
             for (int kk = 0; kk < 4 && kk < K - j * 4; kk++) {
                 register __m256d a0x = _mm256_broadcast_sd(A + 6 * i * lda + j * 4 + kk);
@@ -80,9 +79,16 @@ static void do_block(int lda, int M, int N, int K, double *A, double *B, double 
                     c_50_53 = _mm256_fmadd_pd(a5x, b_10_13, c_50_53);
                     c_50_53 = _mm256_fmadd_pd(a5x, b_20_23, c_50_53);
                     c_50_53 = _mm256_fmadd_pd(a5x, b_30_33, c_50_53);
-                    }
                 }
             }
+            _mm256_storeu_pd(C + 6 * i * lda + j * 4, c_00_03);
+            _mm256_storeu_pd(C + (6 * i + 1) * lda + j * 4, c_10_13);
+            _mm256_storeu_pd(C + (6 * i + 2) * lda + j * 4, c_20_23);
+            _mm256_storeu_pd(C + (6 * i + 3) * lda + j * 4, c_30_33);
+            _mm256_storeu_pd(C + (6 * i + 4) * lda + j * 4, c_40_43);
+            _mm256_storeu_pd(C + (6 * i + 5) * lda + j * 4, c_50_53);
+        }
+
 //            /* Compute C(i,j) */
 //            double cij = C[i * lda + j];
 //            for (int k = 0; k < K; ++k)
@@ -92,15 +98,9 @@ static void do_block(int lda, int M, int N, int K, double *A, double *B, double 
 //                    cij += A[i * lda + k] * B[k * lda + j];
 //#endif
 //            C[i * lda + j] = cij;
-            _mm256_storeu_pd(C + 6 * i * lda + j * 4, c_00_03);
-            _mm256_storeu_pd(C + (6 * i + 1) * lda + j * 4, c_10_13);
-            _mm256_storeu_pd(C + (6 * i + 2) * lda + j * 4, c_20_23);
-            _mm256_storeu_pd(C + (6 * i + 3) * lda + j * 4, c_30_33);
-            _mm256_storeu_pd(C + (6 * i + 4) * lda + j * 4, c_40_43);
-            _mm256_storeu_pd(C + (6 * i + 5) * lda + j * 4, c_50_53);
-        }
     }
 }
+
 
 /* This routine performs a dgemm operation
  *  C := C + A * B
