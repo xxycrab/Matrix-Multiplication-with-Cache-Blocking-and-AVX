@@ -16,13 +16,13 @@ const char *dgemm_desc = "Simple blocked dgemm.";
 #if !defined(BLOCK_SIZE)
 #define BLOCK_SIZE_M 512
 #define BLOCK_SIZE_1_M 256
-#define BLOCK_SIZE_2_M 32
+#define BLOCK_SIZE_2_M 48
 #define BLOCK_SIZE_N 512
 #define BLOCK_SIZE_1_N 256
-#define BLOCK_SIZE_2_N 32
+#define BLOCK_SIZE_2_N 48
 #define BLOCK_SIZE_K 512
 #define BLOCK_SIZE_1_K 256
-#define BLOCK_SIZE_2_K 32
+#define BLOCK_SIZE_2_K 48
 // #define BLOCK_SIZE 719
 #endif
 
@@ -142,10 +142,6 @@ void square_dgemm(int lda, double *A, double *B, double *C) {
             }
         }
     }
-//    free(A);
-//    free(B);
-
-    /* For each block-row of A */
     for (int i = 0; i < LDA; i += BLOCK_SIZE_M)
         /* For each block-column of B */
         for (int j = 0; j < LDA; j += BLOCK_SIZE_N)
@@ -155,7 +151,6 @@ void square_dgemm(int lda, double *A, double *B, double *C) {
                 int M = min (BLOCK_SIZE_M, LDA - i);
                 int N = min (BLOCK_SIZE_N, LDA - j);
                 int K = min (BLOCK_SIZE_K, LDA - k);
-
                 /* Perform individual block dgemm */
 #ifdef TRANSPOSE
                 do_block_L1(LDA, M, N, K, A_new + i*LDA + k, B_new + j*LDA + k, C_new + i*LDA + j);
@@ -176,4 +171,7 @@ void square_dgemm(int lda, double *A, double *B, double *C) {
         B[j*lda+i] = t;
     }
 #endif
+    free(A_new);
+    free(B_new);
+    free(C_new);
 }
