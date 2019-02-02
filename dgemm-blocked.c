@@ -14,14 +14,14 @@ const char *dgemm_desc = "Simple blocked dgemm.";
 #include "debugMat.c"
 
 #if !defined(BLOCK_SIZE)
-#define BLOCK_SIZE_M 1024
-#define BLOCK_SIZE_1_M 512
-#define BLOCK_SIZE_2_M 64
-#define BLOCK_SIZE_N 1024
-#define BLOCK_SIZE_1_N 512
+#define BLOCK_SIZE_M 1152
+#define BLOCK_SIZE_1_M 384
+#define BLOCK_SIZE_2_M 48
+#define BLOCK_SIZE_N 1152
+#define BLOCK_SIZE_1_N 384
 #define BLOCK_SIZE_2_N 48
-#define BLOCK_SIZE_K 1024
-#define BLOCK_SIZE_1_K 512
+#define BLOCK_SIZE_K 1152
+#define BLOCK_SIZE_1_K 384
 #define BLOCK_SIZE_2_K 48
 // #define BLOCK_SIZE 719
 #endif
@@ -35,57 +35,64 @@ const char *dgemm_desc = "Simple blocked dgemm.";
 /* Vector tiling and loop unrolling */
 static void do_block(int lda, int M, int N, int K, double* restrict A, double* restrict B, double* restrict C) {
     /* For each row i of A */
-    for (int i = 0; i < M / 8; ++i) {
+    for (int i = 0; i < M / 4; ++i) {
         /* For each column j of B */
-        for (int j = 0; j < N / 4; ++j) {
-            register __m256d c_00_03 = _mm256_loadu_pd(C + min(8 * i, M - 1) * lda + j * 4);
-            register __m256d c_10_13 = _mm256_loadu_pd(C + min(8 * i + 1, M - 1) * lda + j * 4);
-            register __m256d c_20_23 = _mm256_loadu_pd(C + min(8 * i + 2, M - 1) * lda + j * 4);
-            register __m256d c_30_33 = _mm256_loadu_pd(C + min(8 * i + 3, M - 1) * lda + j * 4);
-            register __m256d c_40_43 = _mm256_loadu_pd(C + min(8 * i + 4, M - 1) * lda + j * 4);
-            register __m256d c_50_53 = _mm256_loadu_pd(C + min(8 * i + 5, M - 1) * lda + j * 4);
-            register __m256d c_60_63 = _mm256_loadu_pd(C + min(8 * i + 6, M - 1) * lda + j * 4);
-            register __m256d c_70_73 = _mm256_loadu_pd(C + min(8 * i + 7, M - 1) * lda + j * 4);
+        for (int j = 0; j < N / 12; ++j) {
+            register __m256d c_00_03_0 = _mm256_loadu_pd(C + (4 * i) * lda + j * 12);
+            register __m256d c_00_03_1 = _mm256_loadu_pd(C + (4 * i) * lda + j * 12 + 4);
+            register __m256d c_00_03_2 = _mm256_loadu_pd(C + (4 * i) * lda + j * 12 + 8);
+            register __m256d c_10_13_0 = _mm256_loadu_pd(C + (4 * i + 1) * lda + j * 12);
+            register __m256d c_10_13_1 = _mm256_loadu_pd(C + (4 * i + 1) * lda + j * 12+4);
+            register __m256d c_10_13_2 = _mm256_loadu_pd(C + (4 * i + 1) * lda + j * 12+8);
+            register __m256d c_20_23_0 = _mm256_loadu_pd(C + (4 * i + 2) * lda + j * 12);
+            register __m256d c_20_23_1 = _mm256_loadu_pd(C + (4 * i + 2) * lda + j * 12+4);
+            register __m256d c_20_23_2 = _mm256_loadu_pd(C + (4 * i + 2) * lda + j * 12+8);
+            register __m256d c_30_33_0 = _mm256_loadu_pd(C + (4 * i + 3) * lda + j * 12);
+            register __m256d c_30_33_1 = _mm256_loadu_pd(C + (4 * i + 3) * lda + j * 12+4);
+            register __m256d c_30_33_2 = _mm256_loadu_pd(C + (4 * i + 3) * lda + j * 12+8);
 
             /* Loop unrolling */
             for (int k = 0; k < K; k += 1) {
-                register __m256d b_00_03 = _mm256_loadu_pd(B + k * lda + j * 4);
+                register __m256d b_00_03 = _mm256_loadu_pd(B + k * lda + j * 12);
+                register __m256d b_10_03 = _mm256_loadu_pd(B + k * lda + j * 12+4);
+                register __m256d b_20_03 = _mm256_loadu_pd(B + k * lda + j * 12+8);
+                register __m256d a00 = _mm256_broadcast_sd(A + (4 * i) * lda + k);
 
-                register __m256d a00 = _mm256_broadcast_sd(A + (8 * i) * lda + k);
-                c_00_03 = _mm256_fmadd_pd(a00, b_00_03, c_00_03);
+                c_00_03_0 = _mm256_fmadd_pd(a00, b_00_03, c_00_03_0);
+                c_00_03_1 = _mm256_fmadd_pd(a00, b_10_03, c_00_03_1);
+                c_00_03_2 = _mm256_fmadd_pd(a00, b_20_03, c_00_03_2);
 
-                a00 = _mm256_broadcast_sd(A + (8 * i +1) * lda + k);
-                c_10_13 = _mm256_fmadd_pd(a00, b_00_03, c_10_13);
+                a00 = _mm256_broadcast_sd(A + (4 * i + 1) * lda + k);
+                c_10_13_0 = _mm256_fmadd_pd(a00, b_00_03, c_10_13_0);
+                c_10_13_1 = _mm256_fmadd_pd(a00, b_10_03, c_10_13_1);
+                c_10_13_2 = _mm256_fmadd_pd(a00, b_20_03, c_10_13_2);
 
-                a00 = _mm256_broadcast_sd(A + (8 * i +2) * lda + k);
-                c_20_23 = _mm256_fmadd_pd(a00, b_00_03, c_20_23);
+                a00 = _mm256_broadcast_sd(A + (4 * i + 2) * lda + k);
+                c_20_23_0 = _mm256_fmadd_pd(a00, b_00_03, c_20_23_0);
+                c_20_23_1 = _mm256_fmadd_pd(a00, b_10_03, c_20_23_1);
+                c_20_23_2 = _mm256_fmadd_pd(a00, b_20_03, c_20_23_2);
 
-                a00 = _mm256_broadcast_sd(A + (8 * i +3) * lda + k);
-                c_30_33 = _mm256_fmadd_pd(a00, b_00_03, c_30_33);
-
-                a00 = _mm256_broadcast_sd(A + (8 * i+4) * lda + k);
-                c_40_43 = _mm256_fmadd_pd(a00, b_00_03, c_40_43);
-
-                a00 = _mm256_broadcast_sd(A + (8 * i+5) * lda + k);
-                c_50_53 = _mm256_fmadd_pd(a00, b_00_03, c_50_53);
-
-                a00 = _mm256_broadcast_sd(A + (8 * i+6) * lda + k);
-                c_60_63 = _mm256_fmadd_pd(a00, b_00_03, c_60_63);
-
-                a00 = _mm256_broadcast_sd(A + (8 * i+7) * lda + k);
-                c_70_73 = _mm256_fmadd_pd(a00, b_00_03, c_70_73);
+                a00 = _mm256_broadcast_sd(A + (4 * i + 3) * lda + k);
+                c_30_33_0 = _mm256_fmadd_pd(a00, b_00_03, c_30_33_0);
+                c_30_33_1 = _mm256_fmadd_pd(a00, b_10_03, c_30_33_1);
+                c_30_33_2 = _mm256_fmadd_pd(a00, b_20_03, c_30_33_2);
             }
-            _mm256_storeu_pd(C + (8 * i) * lda + j * 4, c_00_03);
-            _mm256_storeu_pd(C + (8 * i + 1) * lda + j * 4, c_10_13);
-            _mm256_storeu_pd(C + (8 * i + 2) * lda + j * 4, c_20_23);
-            _mm256_storeu_pd(C + (8 * i + 3) * lda + j * 4, c_30_33);
-            _mm256_storeu_pd(C + (8 * i + 4) * lda + j * 4, c_40_43);
-            _mm256_storeu_pd(C + (8 * i + 5) * lda + j * 4, c_50_53);
-            _mm256_storeu_pd(C + (8 * i + 6) * lda + j * 4, c_60_63);
-            _mm256_storeu_pd(C + (8 * i + 7) * lda + j * 4, c_70_73);
+            _mm256_storeu_pd(C + (4 * i) * lda + j * 12, c_00_03_0);
+            _mm256_storeu_pd(C + (4 * i) * lda + j * 12+ 4 , c_00_03_1);
+            _mm256_storeu_pd(C + (4 * i) * lda + j * 12+ 8 , c_00_03_2);
+            _mm256_storeu_pd(C + (4 * i + 1) * lda + j * 12, c_10_13_0);
+            _mm256_storeu_pd(C + (4 * i + 1) * lda + j * 12+ 4, c_10_13_1);
+            _mm256_storeu_pd(C + (4 * i + 1) * lda + j * 12+ 8, c_10_13_2);
+            _mm256_storeu_pd(C + (4 * i + 2) * lda + j * 12, c_20_23_0);
+            _mm256_storeu_pd(C + (4 * i + 2) * lda + j * 12 + 4, c_20_23_1);
+            _mm256_storeu_pd(C + (4 * i + 2) * lda + j * 12 + 8, c_20_23_2);
+            _mm256_storeu_pd(C + (4 * i + 3) * lda + j * 12, c_30_33_0);
+            _mm256_storeu_pd(C + (4 * i + 3) * lda + j * 12 + 4, c_30_33_1);
+            _mm256_storeu_pd(C + (4 * i + 3) * lda + j * 12 + 8, c_30_33_2);
         }
     }
 }
+
 
 /* Third level blocking, L2 cache*/
 static void do_block_L2(int lda, int M1, int N1, int K1, double* restrict A, double* restrict B, double* restrict C) {
@@ -131,20 +138,16 @@ void square_dgemm(int lda, double* restrict A, double* restrict B, double* restr
 #endif
     /* Deal with edge condition
      * padding matrix to 4n*4n */
-    int r = lda % 4, LDA = lda;   //residual of 4*4 tiling
+    int r = lda % 12, LDA = lda;   //residual of 4*4 tiling
     if (r != 0) {
-        LDA = lda + (4 - r);
-    }
-    int c = lda % 8, LDC = lda;   //residual of 4*4 tiling
-    if (c != 0) {
-        LDC = lda + (8 - c);
+        LDA = lda + (12 - r);
     }
 
-    double *A_new = (double *) _mm_malloc(LDA * LDC * sizeof(double), 32);
-    double *B_new = (double *) _mm_malloc(LDA * LDC * sizeof(double), 32);
-    double *C_new = (double *) _mm_malloc(LDA * LDC * sizeof(double), 32);
+    double *A_new = (double *) _mm_malloc(LDA * LDA * sizeof(double), 32);
+    double *B_new = (double *) _mm_malloc(LDA * LDA * sizeof(double), 32);
+    double *C_new = (double *) _mm_malloc(LDA * LDA * sizeof(double), 32);
 
-    for (int i = 0; i < LDC; i++) {
+    for (int i = 0; i < LDA; i++) {
         for (int j = 0; j < LDA; j++) {
             if (i < lda && j < lda) {
                 A_new[i * LDA + j] = A[i * lda + j];
@@ -157,21 +160,18 @@ void square_dgemm(int lda, double* restrict A, double* restrict B, double* restr
             }
         }
     }
-
-    /* For each block-row of A */
-    for (int i = 0; i < LDC; i += BLOCK_SIZE_M)
+    for (int i = 0; i < LDA; i += BLOCK_SIZE_M)
         /* For each block-column of B */
         for (int j = 0; j < LDA; j += BLOCK_SIZE_N)
             /* Accumulate block dgemms into block of C */
             for (int k = 0; k < LDA; k += BLOCK_SIZE_K) {
                 /* Correct block dimensions if block "goes off edge of" the matrix */
-                int M = min (BLOCK_SIZE_M, LDC - i);
+                int M = min (BLOCK_SIZE_M, LDA - i);
                 int N = min (BLOCK_SIZE_N, LDA - j);
                 int K = min (BLOCK_SIZE_K, LDA - k);
-
                 /* Perform individual block dgemm */
 #ifdef TRANSPOSE
-                do_block_L1(LDA, M, N, K, A_new + i * LDA + k, B_new + j * LDA + k, C_new + i * LDA + j);
+                do_block_L1(LDA, M, N, K, A_new + i*LDA + k, B_new + j*LDA + k, C_new + i*LDA + j);
 #else
                 do_block_L1(LDA, M, N, K, A_new + i * LDA + k, B_new + k * LDA + j, C_new + i * LDA + j);
                 for(int i = 0; i<lda; i++){
@@ -181,9 +181,6 @@ void square_dgemm(int lda, double* restrict A, double* restrict B, double* restr
                 }
 #endif
             }
-    free(A_new);
-    free(B_new);
-    free(C_new);
 #if TRANSPOSE
     for (int i = 0; i < lda; ++i)
     for (int j = i+1; j < lda; ++j) {
@@ -192,4 +189,7 @@ void square_dgemm(int lda, double* restrict A, double* restrict B, double* restr
         B[j*lda+i] = t;
     }
 #endif
+    free(A_new);
+    free(B_new);
+    free(C_new);
 }
