@@ -13,7 +13,7 @@ If you worked alone leave column B blank
 
 (1) List the names of your team members:
 
-A:
+A:Xinyu Xie (A53285829)
 
  
 B:
@@ -23,22 +23,27 @@ B:
 (2) Estimate how much time each team member devoted to this project, in HOURS.
 
   	                        A 	       B
-meetings 	  	  	 
-coding 	  	  	 
-writeup 	  	  	 
-planning (alone) 	  	  	 
-total (including meetings) 	  	  	 
+meetings 	  	  	6              6 
+coding 	  	  	        12             12
+writeup 	  	  	10             10 
+planning (alone) 	  	4              4  	 
+total (including meetings) 	32             32  	  	 
 
 
 (3) Discuss the following.
 (a) If you worked in a team, what were the major responsibilities
     of each team member?
+    We almost share every part of the work.
 (b) Did you complete the assignment?
+    Yes!
 (c) What were your major strengths and weaknesses in doing this
     assignment (individually or in a team)?
     If in a team, also discuss how your team worked together.
 (d) What  lessons did you learn from these events.
 (e) If in a team, whether and how you plan to change the way
     your work together .
+    No, we do not think we are to change the way we work because 
+    we cooperate very well.
 (f) Anything else that comes to mind.
 (g) What suggestions do you have to improve this assignment?
+    Maybe a tutorial on how to set whole environment on Linux system would be helpful.
