@@ -13,32 +13,48 @@ If you worked alone leave column B blank
 
 (1) List the names of your team members:
 
-A:
+A:Xinyu Xie (A53285829)
 
  
-B:
+B:Yiming Liao (A53274851)
 
  
  
 (2) Estimate how much time each team member devoted to this project, in HOURS.
 
-  	                        A 	       B
-meetings 	  	  	 
-coding 	  	  	 
-writeup 	  	  	 
-planning (alone) 	  	  	 
-total (including meetings) 	  	  	 
+                             A              B
+meetings                     6              6
+coding                      12             12
+writeup                     10             10
+planning (alone)             4              4
+total (including meetings)  32             32
 
 
 (3) Discuss the following.
 (a) If you worked in a team, what were the major responsibilities
     of each team member?
+    We almost share every part of the work.
+
 (b) Did you complete the assignment?
+    Yes!
+
 (c) What were your major strengths and weaknesses in doing this
     assignment (individually or in a team)?
     If in a team, also discuss how your team worked together.
+    The Strengths are we are familiar with each other and we can cooperate very well, and we both good coder to write efficient code.
+    The weaknesses are we don't use c so often and we need to get familiar with the language.  
+
 (d) What  lessons did you learn from these events.
+    Even though it is a short program, we need to spend much time to optimize the code, the world of cache is really complex and any small change may  have an influence on the final performance.
+
 (e) If in a team, whether and how you plan to change the way
     your work together .
+    No, we do not think we are to change the way we work because 
+    we cooperate very well.
+
 (f) Anything else that comes to mind.
+    
+    Thanks for the help and advice given by professor and TAs when we solve the assignment! 
+
 (g) What suggestions do you have to improve this assignment?
+    Maybe a tutorial on how to set whole environment on Linux system would be helpful.
