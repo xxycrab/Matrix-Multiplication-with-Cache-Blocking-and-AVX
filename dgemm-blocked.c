@@ -15,13 +15,13 @@ const char *dgemm_desc = "Simple blocked dgemm.";
 #include "debugMat.c"
 
 #if !defined(BLOCK_SIZE)
-#define BLOCK_SIZE_M 1154
+#define BLOCK_SIZE_M 1152
 #define BLOCK_SIZE_1_M 384
 #define BLOCK_SIZE_2_M 48
-#define BLOCK_SIZE_N 1154
+#define BLOCK_SIZE_N 1152
 #define BLOCK_SIZE_1_N 384
 #define BLOCK_SIZE_2_N 48
-#define BLOCK_SIZE_K 1154
+#define BLOCK_SIZE_K 1152
 #define BLOCK_SIZE_1_K 384
 #define BLOCK_SIZE_2_K 48
 // #define BLOCK_SIZE 719

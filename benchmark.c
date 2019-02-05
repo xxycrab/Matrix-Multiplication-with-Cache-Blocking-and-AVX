@@ -7,9 +7,11 @@
  */
 
 
+
 #include <stdlib.h> // For: exit, random, malloc, free, NULL, EXIT_FAILURE
 #include <stdio.h>  // For: perror
 #include <string.h> // For: memset
+
 
 #include <float.h>  // For: DBL_EPSILON
 #include <math.h>   // For: fabs
