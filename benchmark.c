@@ -6,6 +6,7 @@
  *      Support CBLAS interface
  */
 
+
 #include <stdlib.h> // For: exit, random, malloc, free, NULL, EXIT_FAILURE
 #include <stdio.h>  // For: perror
 #include <string.h> // For: memset

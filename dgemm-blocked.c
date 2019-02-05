@@ -6,6 +6,7 @@
  *    Support CBLAS interface
  */
 
+
 const char *dgemm_desc = "Simple blocked dgemm.";
 
 #include <immintrin.h>
